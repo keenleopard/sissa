@@ -1,1 +1,0 @@
-# sissa summer school
