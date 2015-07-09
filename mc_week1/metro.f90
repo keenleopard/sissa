@@ -91,7 +91,7 @@ subroutine energy_diff(r_all, r_move, mv, n, du, rc, L)
     du = 4.d0 * (u2 - u1)
 end subroutine
 
-program metropolis
+subroutine metropolis(energy)
     use para_module
     implicit none
     integer,parameter :: n=100 !number of particles
@@ -100,10 +100,12 @@ program metropolis
     real(8) :: del, uold, unew, du
     integer :: mv, iter, dimen, i, accepted
     real(8) :: L, rc
+    real(8), intent(out):: energy(2000)
     !logical :: newposi
 
     call init_random_seed()
 
+    energy = 0.d0
     acc = 0.d0
     L=(n/rho)**(1.d0/3.d0) ! Size of box L=(n/rho)^(1/3)
     del = 0.1*L
@@ -120,7 +122,7 @@ program metropolis
     !newposi = .true.
     accepted =0
 
-    do iter = 1, 1000000
+    do iter = 1, 100000
         call random_number(rand_mv)
         rand_mv = rand_mv * n
         mv = int(rand_mv) + 1
@@ -145,9 +147,23 @@ program metropolis
             r_old(:,mv) = r_new(:,mv)
             call lennard_jones(r_old, n, uold, rc, L)
             accepted = accepted +1
-            print *, accepted,iter," u=", uold, " acc=", acc, " du= ", du
+            !print *, accepted,iter," u=", uold, " acc=", acc, " du= ", du
+            if (accepted .gt. 5000) energy(accepted - 5000) = uold
         else 
             !print *, "rejected"
         end if
     end do
+end subroutine
+
+program main
+    implicit none
+    real(8) :: energy(2000)
+    integer :: i
+    call metropolis(energy)
+
+    do i = 1, 2000
+        print * , energy(i)
+    end do
 end program
+    
+
