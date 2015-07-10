@@ -36,6 +36,7 @@ program iteration
         print '(i3, $)', i
     end do
     print *, " "
+    print *, log(10.d0), log(2.71828)
         
 end program 
         
