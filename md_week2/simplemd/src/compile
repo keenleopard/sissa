@@ -1,0 +1,11 @@
+#!/bin/bash
+
+F90="gfortran-mp-4.9"
+SRC="routines.f90 simplemd.f90 ran1.f gasdev.f"
+
+case $F90 in
+(gfortran) OPT="-O -fdefault-real-8" ;;
+(g95)      OPT="-O -r8" ;;
+esac
+
+$F90 $OPT $SRC -o simplemd.x
