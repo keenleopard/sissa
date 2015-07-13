@@ -2,7 +2,7 @@ module para_module
     implicit none
     save
     real(8), parameter :: eps12 =1.d-12
-    real(8),parameter  :: rho=0.5, T=2.d0, P=0.2
+    real(8),parameter  :: rho=0.5, T=2.d0, P=3.0
 end module
 
 subroutine init_random_seed()
@@ -107,7 +107,7 @@ subroutine energy_diff_v2(r1, r2, n, du, rc, L1, L2)
     real(8), intent(in) :: r1(3,n), r2(3, n), rc, L1, L2
     integer, intent(in) :: n 
     real(8), intent(out) :: du
-    real(8) :: u1, u2, r2, rc2, v1, v2
+    real(8) :: u1, u2, rc2, v1, v2
 
     u1 = 0.d0
     u2 = 0.d0
@@ -121,7 +121,7 @@ subroutine energy_diff_v2(r1, r2, n, du, rc, L1, L2)
     du = (u2 - u1) + P*(v2-v1) - n*T*log(v2/v1)
 end subroutine
 
-subroutine trial_move(n,r_old, r_new, L, L_new, mv )
+subroutine trial_move(n,r_old, r_new, L_old, L_new, mv )
 ! this subroutine is to propose a trial partical move OR a volume move
 ! on average 1 out of 100 total trial moves is volume
 ! and on average the prob(left) = prob(right) for volume move
@@ -134,15 +134,16 @@ subroutine trial_move(n,r_old, r_new, L, L_new, mv )
     real(8) :: rand_choice, rand_lf, rand_L, rand_mv, rand(3), dl, delta
     integer :: dimen
 
-    dl = 0.01*L
-    delta=0.1*L
+    dl = 0.005*L_old
+    delta=0.1*L_old
     r_new = r_old 
     L_new = L_old
     mv = 0
     call random_number(rand_choice)
     if (rand_choice < ratio) then       !move volume here
         mv = -1
-        call random_number(rand_lf, rand_L) 
+        call random_number(rand_lf) 
+        call random_number(rand_L)
         if (rand_lf < 0.5) then         !decrease volume
             L_new = L_old - dl*rand_L
         else                            !increase volume
@@ -155,8 +156,8 @@ subroutine trial_move(n,r_old, r_new, L, L_new, mv )
         do dimen = 1,3
             call random_number(rand(dimen))
             r_new(dimen,mv) = r_new(dimen,mv) + delta*(rand(dimen) - 0.5)
-            if (r_new(dimen,mv) .lt. 0) r_new(dimen,mv) = r_new(dimen,mv) +L
-            if (r_new(dimen,mv) .gt. L) r_new(dimen,mv) = r_new(dimen,mv) -L
+            if (r_new(dimen,mv) .lt. 0) r_new(dimen,mv) = r_new(dimen,mv) +L_old
+            if (r_new(dimen,mv) .gt. L_old) r_new(dimen,mv) = r_new(dimen,mv) -L_old
         end do
     end if
 end subroutine trial_move
@@ -212,7 +213,7 @@ subroutine metropolis
             L = Lnew
             call lennard_jones(r_old, n, u, rc, L)
             accepted = accepted +1
-            acceptance = accepted / iter
+            acceptance = dfloat(accepted) / iter
             density = N/ (L**3)
             print *, accepted,iter, acceptance, "u=", u, "du= ", du, "rho=", density
         else 
