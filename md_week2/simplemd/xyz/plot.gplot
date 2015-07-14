@@ -1,7 +1,0 @@
-#! /opt/local/bin/gnuplot
-
-p [0:10] "energies_0.005.dat" u 2:6 ev 10 w l,\
-"energies_0.01.dat" u 2:6 ev 10 w l , \
-'energies_0.015.dat' u 2:6 ev 10 w l ,\
-'energies_0.02.dat' u 2:6  ev 10 w l ,\
-'energies_0.025.dat' u 2:6 ev 10 w l
