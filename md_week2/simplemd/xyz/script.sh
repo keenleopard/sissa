@@ -1,5 +1,9 @@
-for dt in 0.005 0.01 0.015 0.02 0.025 
+for T in 0.3 2.0 
 do 
-#sed s/'$time'/$dt/g in > in_$dt
-../src/simplemd.x < in_$dt
+sed s/'$temp'/$T/g in > in_$T
+../src/simplemd.x < in_$T
 done
+
+
+# a compact to write for is 
+# for ((temp=0.0;temp<100;temp++))
